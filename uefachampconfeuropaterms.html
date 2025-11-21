@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omairs Match Extractor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
+
+        /* Theme Colors */
+        :root {
+            --bg-main: #121212;
+            --bg-panel: #1e1e1e;
+            --border-color: #333333;
+            --accent-orange: #f97316;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --btn-green: #22c55e;
+            --btn-green-hover: #16a34a;
+            --btn-red: #ef4444;
+            --btn-red-hover: #dc2626;
+            --text-main: #e5e5e5;
+            --text-muted: #a3a3a3;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .input-area {
+            background-color: #161616;
+            border: 1px solid #2a2a2a;
+            color: var(--text-main);
+        }
+
+        .input-area:focus {
+            border-color: #444;
+            outline: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        .btn-green {
+            background-color: var(--btn-green);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-green:hover:not(:disabled) {
+            background-color: var(--btn-green-hover);
+        }
+
+        .btn-red {
+            background-color: var(--btn-red);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-red:hover {
+            background-color: var(--btn-red-hover);
+        }
+
+        .loader {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Fade In Animation */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* League Badges */
+        .league-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+        .badge-champions { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .badge-europa { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+        .badge-conference { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+        .badge-unknown { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6">
+
+    <!-- Header -->
+    <div class="max-w-5xl mx-auto w-full flex justify-center items-center mb-8">
+        <h1 class="text-3xl font-bold text-white tracking-tight">Omairs Match Extractor</h1>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto w-full flex flex-col gap-6">
+        
+        <!-- Input Panel -->
+        <div class="panel p-6">
+            <h2 class="text-xl font-semibold mb-4 border-b border-[#333] pb-2">Schedule Input</h2>
+            
+            <div class="flex flex-col gap-4">
+                <textarea id="inputText" class="input-area w-full h-40 rounded p-4 text-sm mono-font resize-none" 
+                placeholder="Paste your schedule here...
+No more than 10 events or else it may not handle the load.
+
+Example:
+26/11/2025 Champions League: Paris vs Tottenham 20:00 22:00
+27/11/2025 Europa League: Ajax vs Roma 17:30 19:30"></textarea>
+
+                <div class="flex gap-4">
+                    <button id="extractBtn" onclick="processMatches()" class="btn-green font-semibold py-2 px-6 rounded shadow-lg flex items-center justify-center gap-2 min-w-[160px]">
+                        <span id="btnText">Extract Matches</span>
+                        <div id="btnLoader" class="loader hidden"></div>
+                    </button>
+                    
+                    <button onclick="clearInput()" class="btn-red font-semibold py-2 px-6 rounded shadow-lg">
+                        Clear Input
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Area -->
+        <div id="resultsArea" class="flex flex-col gap-4 hidden">
+            
+            <div class="flex flex-wrap gap-4 justify-center w-full">
+                <!-- Champions League Terms -->
+                <div id="box-champions" class="panel p-4 border-l-4 border-blue-500 bg-[#161b22] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                    <div>
+                        <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-star mr-1"></i> Champions League
+                        </h3>
+                        <div class="bg-[#0d1117] border border-[#30363d] rounded p-3 font-mono text-xs text-gray-300">
+                            <div class="leading-relaxed">UEFA</div>
+                            <div class="leading-relaxed">Champions League</div>
+                            <div class="leading-relaxed">ChampionsLeague</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
+                            <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
+                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                        </p>
+                    </div>
+                    <button onclick="copyText('UEFA\nChampions League\nChampionsLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                        <i class="fa-regular fa-copy"></i> Copy Terms
+                    </button>
+                </div>
+
+                <!-- Europa League Terms -->
+                <div id="box-europa" class="panel p-4 border-l-4 border-orange-500 bg-[#1f1612] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                    <div>
+                        <h3 class="text-orange-400 font-bold text-sm uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-trophy mr-1"></i> Europa League
+                        </h3>
+                        <div class="bg-[#0d1117] border border-[#30363d] rounded p-3 font-mono text-xs text-gray-300">
+                            <div class="leading-relaxed">UEFA</div>
+                            <div class="leading-relaxed">Europa League</div>
+                            <div class="leading-relaxed">EuropaLeague</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
+                            <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
+                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                        </p>
+                    </div>
+                    <button onclick="copyText('UEFA\nEuropa League\nEuropaLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                        <i class="fa-regular fa-copy"></i> Copy Terms
+                    </button>
+                </div>
+
+                <!-- Conference League Terms -->
+                <div id="box-conference" class="panel p-4 border-l-4 border-green-500 bg-[#121f16] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                    <div>
+                        <h3 class="text-green-400 font-bold text-sm uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-medal mr-1"></i> Conference League
+                        </h3>
+                        <div class="bg-[#0d1117] border border-[#30363d] rounded p-3 font-mono text-xs text-gray-300">
+                            <div class="leading-relaxed">UEFA</div>
+                            <div class="leading-relaxed">Conference League</div>
+                            <div class="leading-relaxed">ConferenceLeague</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
+                            <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
+                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                        </p>
+                    </div>
+                    <button onclick="copyText('UEFA\nConference League\nConferenceLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                        <i class="fa-regular fa-copy"></i> Copy Terms
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-semibold text-white flex items-center justify-between mt-4">
+                <span>Active Slots</span>
+                <span id="slotCount" class="text-sm text-gray-500 font-normal"></span>
+            </h2>
+            <div id="slotsContainer" class="flex flex-col gap-4">
+                <!-- Slots will be injected here -->
+            </div>
+        </div>
+
+        <!-- Empty State / Status -->
+        <div id="statusArea" class="panel p-12 flex flex-col items-center justify-center text-center">
+            <p id="statusText" class="text-gray-500">No active extractions. Paste schedule above to begin.</p>
+        </div>
+
+    </main>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Configuration ---
+        const API_KEY = "AIzaSyAtSwBmdomXY6Ym5u4y5MqkxsxF1sreTpY"; 
+        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        
+        // Master Data Object
+        const MASTER_DB = {
+            // --- CHAMPIONS LEAGUE ---
+            "Arsenal": { aliases: "Arsenal", zh: "阿森纳", ar: "آرسنال", th: "อาร์เซนอล", ru: "Арсенал" },
+            "Aston Villa": { aliases: "Aston Villa", zh: "阿斯顿维拉", ar: "أستون فيلا", th: "แอสตันวิลล่า", ru: "Астон вилла" },
+            "Atalanta": { aliases: "Atalanta", zh: "亚特兰大", ar: "أتالانتا", th: "อตาลันต้า", ru: "Аталанта" },
+            "Atletico Madrid": { aliases: "Atlético/Atletico/Madrid", zh: "马德里竞技", ar: "أتليتيكو مدريد", th: "แอตเลติโก", ru: "Атлетико / Атлетико Мадрид" },
+            "Barcelona": { aliases: "Barcelona", zh: "巴塞罗那", ar: "برشلونة", th: "บาร์เซโลน่า", ru: "Барселона" },
+            "Bayern Munich": { aliases: "Bayern/München/Munchen/Munich", zh: "拜仁慕尼黑", ar: "بايرن ميونيخ", th: "บาเยิร์น มิวนิค", ru: "Бавария / Бавария Мюнхен" },
+            "Bayer Leverkusen": { aliases: "Bayer / Leverkusen", zh: "勒沃库森", ar: "باير ليفركوزن", th: "ไบเออร์ เลเวอร์คูเซ่น", ru: "Байер 04 / Леверкузен" },
+            "Benfica": { aliases: "Benfica", zh: "本菲卡", ar: "بنفيكا", th: "เบนฟิก้", ru: "Бенфика" },
+            "Borussia Dortmund": { aliases: "Borussia/Dortmund", zh: "多特蒙德", ar: "بوروسيا دورتموند", th: "โบรุสเซีย ดอร์ทมุนด์", ru: "Боруссия Дортмунд" },
+            "Bologna": { aliases: "Bologna", zh: "博洛尼亚", ar: "بولونيا", th: "โบโลญญา", ru: "Болонья" },
+            "Brest": { aliases: "Brest", zh: "布雷斯特", ar: "بريست", th: "เบรสต์", ru: "Брест" },
+            "Celtic": { aliases: "Celtic", zh: "凯尔特人", ar: "سلتيك", th: "เซลติก", ru: "Селтик" },
+            "Club Brugge": { aliases: "Club Brugge/Brugge", zh: "布鲁日俱乐部", ar: "كلوب بروج", th: "คลับบรูซ", ru: "Брюгге" },
+            "Red Star Belgrade": { aliases: "Crvena/Zvezda/Red Star", zh: "克里文娜兹维兹达", ar: "كرفينا زفيزدا", th: "เซอร์เวน่า ซเวซดา", ru: "Црвена Звезда" },
+            "Feyenoord": { aliases: "Feyenoord/Feynoord", zh: "费耶诺德", ar: "فينورد", th: "เฟเยนูร์ด", ru: "Фейеноорд" },
+            "Girona": { aliases: "Girona", zh: "赫罗纳", ar: "جيرونا", th: "คิโรน่า", ru: "Жирона" },
+            "Dinamo Zagreb": { aliases: "Dinamo/Zagreb", zh: "萨格勒布迪纳摩", ar: "دينامو زغرب", th: "ดินาโม ซาเกร็บ", ru: "Динамо Загреб" },
+            "Inter Milan": { aliases: "Inter/Internazionale/Inter Milan", zh: "国际米兰", ar: "انتر ميلان", th: "อินเตอร์", ru: "Интер / Интер Милан" },
+            "Juventus": { aliases: "Juventus", zh: "尤文图斯", ar: "يوفنتوس", th: "ยูเวนตุส", ru: "Ювентус" },
+            "Kairat": { aliases: "Kairat", zh: "凯拉特", ar: "قيراط", th: "ไกรัต", ru: "Кайрат" },
+            "RB Leipzig": { aliases: "Leipzig/RB Leipzig", zh: "莱比锡", ar: "لايبزيغ", th: "อาร์บี ไลป์ซิก", ru: "РБ Лейпциг" },
+            "Lille": { aliases: "Lille", zh: "里尔", ar: "ليلليل", th: "ลีลล์", ru: "Лилль" },
+            "Liverpool": { aliases: "Liverpool", zh: "利物浦", ar: "ليفربول", th: "ลิเวอร์พูล", ru: "Ливерпуль" },
+            "Manchester City": { aliases: "Manchester City/Man City", zh: "曼城", ar: "مانشستر سيتي", th: "แมนเชสเตอร์ เมือง", ru: "Манчестер Сити" },
+            "AC Milan": { aliases: "AC Milan/Milan", zh: "AC米兰", ar: "ميلان", th: "มิลาน", ru: "Милан" },
+            "Monaco": { aliases: "Monaco", zh: "摩納哥", ar: "موناكو", th: "มอนาโก", ru: "Монако" },
+            "Newcastle": { aliases: "Newcastle", zh: "纽卡斯尔联", ar: "نيوكاسل يونايتد", th: "นิวคาสเซิล", ru: "Ньюкасл" },
+            "PSG": { aliases: "Paris/PSG/Saint/Germain", zh: "巴黎圣日耳曼", ar: "باريس سان جيرمان", th: "ปารีสแซงต์แชร์กแมง", ru: "ПСЖ" },
+            "Pafos": { aliases: "Pafos", zh: "帕福斯", ar: "بافوس", th: "พาฟอส", ru: "Пафос" },
+            "PSV": { aliases: "PSV/Eindhoven", zh: "埃因霍温", ar: "ايندهوفن", th: "พีเอสวี ไอนด์โฮเฟ่น", ru: "ПСВ" },
+            "Real Madrid": { aliases: "Madrid/Real Madrid", zh: "皇家马德里", ar: "مدريد", th: "เรอัล มาดริด", ru: "Реал Мадрид" },
+            "Slovan Bratislava": { aliases: "Slovan/Bratislava", zh: "斯洛文 布拉迪斯拉发", ar: "براتيسلافا إس كيه سلوفا", th: "สโลวา บราติสลาวา", ru: "Слован Братислава" },
+            "Salzburg": { aliases: "Salzburg", zh: "萨尔茨堡", ar: "سالزبورغ", th: "ซาลซ์บูร์ก", ru: "Зальцбург" },
+            "Shakhtar Donetsk": { aliases: "Shakhtar/Donetsk", zh: "顿涅茨克矿工", ar: "شاختار دونيتسك", th: "ชัคตาร์ โดเนตสค์", ru: "Шахтер" },
+            "Sparta Prague": { aliases: "Sparta/Praha/Prague", zh: "布拉格斯巴达", ar: "سبارتا براغ", th: "สปาร์ต้า ปราก", ru: "Спарта Прага" },
+            "Sporting CP": { aliases: "Sporting/Lisbon/CP", zh: "运动", ar: "سبورتنج", th: "สปอร์ติ้งลิสบอน", ru: "Спортинг" },
+            "Sturm Graz": { aliases: "Sturm/Graz", zh: "格拉茨风暴", ar: "إس كيه ستورم جراتس", th: "เอสเค สตอร์ม กราซ", ru: "Штурм Грац" },
+            "Stuttgart": { aliases: "Stuttgart/Vfb", zh: "斯图加特", ar: "شتوتغارت", th: "สตุ๊ตการ์ท", ru: "Штутгарт" },
+            "Young Boys": { aliases: "Young Boys", zh: "年轻的男孩", ar: "يونج بويز", th: "ชายหนุ่ม", ru: "Янг Бойз" },
+            "Royal Antwerp": { aliases: "Antwerp/Royal Antwerp", zh: "皇家安特卫普", ar: "رويال أنتويرب", th: "รอยัลแอนต์เวิร์ป", ru: "Роял Антверп" },
+            "Copenhagen": { aliases: "København/Copenhagen", zh: "哥本哈根", ar: "كوبنهاجن", th: "โคเปนเฮเกน", ru: "Копенгаген" },
+            "Galatasaray": { aliases: "Galatasaray", zh: "加拉塔萨雷", ar: "غلطة سراي", th: "กาลาตาซาเรย์", ru: "Галатасарай" },
+            "Lazio": { aliases: "Lazio", zh: "拉齐奥", ar: "لاتسيو", th: "ลาซิโอ", ru: "Лацио" },
+            "Lens": { aliases: "Lens", zh: "镜片", ar: "لنس", th: "เลนส์", ru: "Ланс" },
+            "Manchester United": { aliases: "Manchester/Man United/Man Utd", zh: "曼联", ar: "مانشستر يونايتد", th: "แมนเชสเตอร์", ru: "Манчестер Юнайтед" },
+            "Napoli": { aliases: "Napoli", zh: "那不勒斯", ar: "نابولي", th: "นาโปลี", ru: "Наполи" },
+            "Porto": { aliases: "Porto", zh: "波尔图", ar: "بورتو", th: "ปอร์โต", ru: "Порту" },
+            "Real Sociedad": { aliases: "Sociedad/Real Sociedad", zh: "皇家社会", ar: "ريال سوسيداد", th: "เรอัล โซเซียดาด", ru: "เรอัล โซเซียดาด" },
+            "Sevilla": { aliases: "Sevilla", zh: "塞维利亚", ar: "اشبيلية", th: "เซบีย่า", ru: "Севилья" },
+            "Union Berlin": { aliases: "Union/Berlin", zh: "联盟 柏林", ar: "يونيون برلين", th: "ยูเนี่ยน เบอร์ลิน", ru: "Унион Берлин" },
+            "Qarabag": { aliases: "Qarabag", zh: "卡拉巴格足球俱乐部", ar: "نادي كاراباغ لكرة القدم", th: "คาราบัค เอฟเค", ru: "Карабах ФК" },
+            "Villarreal": { aliases: "Villarreal", zh: "比利亚雷亚尔", ar: "فياريال", th: "บียาร์เรอัล", ru: "Вильярреал" },
+            "Tottenham": { aliases: "Tottenham/Spurs", zh: "托特纳姆热刺", ar: "توتنهام", th: "ท็อตแน่ม ฮ็อทสเปอร์", ru: "Тоттенхэм" },
+            
+            // --- EUROPA LEAGUE ---
+            "Basel": { aliases: "Basel", zh: "巴塞尔", ar: "بازل", th: "บาเซิล" },
+            "Braga": { aliases: "Braga", zh: "布拉加", ar: "براغا", th: "บรากา" },
+            "Brann": { aliases: "Brann", zh: "布兰", ar: "بران", th: "แบรนน์" },
+            "Celta Vigo": { aliases: "Celta/Vigo", zh: "塞尔塔维戈", ar: "سيلتا فيغو", th: "เซลต้า บีโก้" },
+            "FCSB": { aliases: "FCSB", zh: "足球俱乐部 FCSB", ar: "نادي كرة القدم FCSB", th: "สโมสรฟุตบอล FCSB" },
+            "Fenerbahce": { aliases: "Fenerbahçe", zh: "费内巴切", ar: "فنربخشة", th: "เฟเนร์บาห์เช่" },
+            "Ferencvaros": { aliases: "Ferencváros", zh: "费伦茨瓦罗斯", ar: "فيرينكفاروس", th: "เฟเรนซ์วารอส" },
+            "Freiburg": { aliases: "Freiburg", zh: "弗赖堡", ar: "فرايبورغ", th: "ไฟรบวร์ก" },
+            "Genk": { aliases: "Genk", zh: "亨克", ar: "جينك", th: "เคงก์" },
+            "GNK Dinamo": { aliases: "GNK/Dinamo", zh: "GNK 迪纳摩", ar: "دينامو جي إن كيه", th: "จีเอ็นเค ไดนาโม" },
+            "Go Ahead Eagles": { aliases: "Go Ahead Eagles", zh: "前进之鹰", ar: "جو أهيد إيجلز", th: "โก อะเฮด อีเกิลส์" },
+            "Ludogorets": { aliases: "Ludogorets", zh: "卢多戈雷茨", ar: "لودوجوريتس", th: "ลูโดโกเร็ตส์" },
+            "Lyon": { aliases: "Lyon", zh: "里昂", ar: "ليون", th: "ลียง" },
+            "Maccabi Tel Aviv": { aliases: "Maccabi/Tel-Aviv", zh: "特拉维夫马卡比", ar: "مكابي تل أبيب", th: "แมคคาบี้ เทลอาวีฟ" },
+            "Malmo": { aliases: "Malmö", zh: "马尔默", ar: "مالمو", th: "มัลเมอ" },
+            "Midtjylland": { aliases: "Midtjylland", zh: "中日德兰", ar: "ميدتييلاند", th: "มิดทิลแลนด์" },
+            "Nice": { aliases: "Nice", zh: "好的", ar: "لطيف - جيد", th: "ดี" },
+            "Nottingham Forest": { aliases: "Nottingham/Forest", zh: "诺丁汉森林", ar: "نوتنغهام فورست", th: "น็อตติงแฮม ฟอเรสต์" },
+            "Panathinaikos": { aliases: "Panathinaikos", zh: "帕纳辛奈科斯", ar: "باناثينايكوس", th: "ปานาธิไนกอส" },
+            "PAOK": { aliases: "PAOK", zh: "帕奥克", ar: "باوك", th: "พีเอโอเค" },
+            "Rangers": { aliases: "Rangers", zh: "游骑兵队", ar: "رينجرز", th: "เรนเจอร์ส" },
+            "Real Betis": { aliases: "Real/Betis", zh: "皇家贝蒂斯", ar: "ريال بيتيس", th: "เรอัล เบติส" },
+            "Roma": { aliases: "Roma", zh: "罗马", ar: "روما", th: "โรม่า" },
+            "Utrecht": { aliases: "Utrecht", zh: "乌得勒支", ar: "أوتريخت", th: "อูเทรคท์" },
+            "Viktoria Plzen": { aliases: "Viktoria/Plzeň", zh: "维多利亚比尔森", ar: "فيكتوريا بلزن", th: "วิกตอเรีย พัลเซน" },
+
+            // --- CONFERENCE LEAGUE ---
+            "Aberdeen": { aliases: "Aberdeen", zh: "阿伯丁", ar: "أبردين", th: "อเบอร์ดีน" },
+            "AEK Athens": { aliases: "AEK/Athens", zh: "雅典", ar: "أثينا", th: "เอเธนส์" },
+            "AEK Larnaca": { aliases: "AEK/Larnaca", zh: "拉纳卡", ar: "لارنكا", th: "ลาร์นากา" },
+            "AZ Alkmaar": { aliases: "Alkmaar/AZ", zh: "AZ Alkmaar", ar: "AZ ألكمار", th: "เอแซด อัลค์มาร์" },
+            "Ballkani": { aliases: "Ballkani", zh: "巴尔卡尼", ar: "بلكاني", th: "บอลคานี" },
+            "Besiktas": { aliases: "Besiktas/Beşiktaş", zh: "贝西克塔斯", ar: "بشيكتاش", th: "เบซิคตัส" },
+            "Bodo Glimt": { aliases: "Bodø/Bodo/Glimt", zh: "闪光", ar: "جليمت", th: "กลิมท์" },
+            "Breidablik": { aliases: "Breidablik/Ungmennafelagid", zh: "布雷达布利克", ar: "بريدابليك", th: "เบรย์ดาบลิก" },
+            "Cukaricki": { aliases: "Čukarički/Cukaricki/Belgrade", zh: "丘卡里奇", ar: "تشوكاريتشكي", th: "ชูคาริชกี้" },
+            "Celje": { aliases: "Celje", zh: "采列", ar: "سيلجي", th: "เซลเย่" },
+            "Crystal Palace": { aliases: "Crystal/Palace", zh: "水晶宫", ar: "كريستال بالاس", th: "คริสตัล พาเลซ" },
+            "Dynamo Kyiv": { aliases: "Dynamo/Kyiv", zh: "基辅迪纳摩", ar: "دينامو كييف", th: "ไดนาโม เคียฟ" },
+            "Drita": { aliases: "Drita", zh: "德丽塔", ar: "دريتا", th: "ดริตา" },
+            "Eintracht Frankfurt": { aliases: "Eintracht/Frankfurt/Francoforte", zh: "法兰克福足球俱乐部", ar: "آينتراخت فرانكفورت", th: "ไอน์ทรัคท์ แฟรงค์เฟิร์ต" },
+            "Fiorentina": { aliases: "Fiorentina", zh: "佛罗伦萨", ar: "فيورنتينا", th: "ฟิออเรนติน่า" },
+            "Hacken": { aliases: "Häcken", zh: "哈肯", ar: "هاكن", th: "แฮคเคน" },
+            "Hamrun Spartans": { aliases: "Hamrun/Spartans", zh: "哈姆伦斯巴达人队", ar: "هامرون سبارتانز", th: "ฮัมรัน สปาร์ตันส์" },
+            "Jagiellonia": { aliases: "Jagiellonia/Białystok", zh: "雅盖隆尼亚", ar: "جاجيلونيا", th: "จาเกียลโลเนีย" },
+            "Klaksvik": { aliases: "Klaksvik/Klaksvíkar/Ítróttarfelag", zh: "克拉克斯维克", ar: "كلاكسفيك", th: "คลากส์วิก" },
+            "KuPS": { aliases: "KuPS/Kuopio", zh: "库奥皮奥", ar: "كوبس كووبيو", th: "คูโอปิโอ" },
+            "Legia Warsaw": { aliases: "Legia/Warsaw/Warszawa", zh: "华沙", ar: "وارسو", th: "วอร์ซอ" },
+            "Lausanne Sport": { aliases: "Lausanne", zh: "洛桑体育", ar: "لوزان سبورت", th: "โลซานน์ สปอร์ต" },
+            "Lech Poznan": { aliases: "Lech/Poznań", zh: "莱赫·波兹南", ar: "ليش بوزنان", th: "เลช โพซนาน" },
+            "Lincoln Red Imps": { aliases: "Lincoln/Red Imps", zh: "林肯红魔", ar: "لينكولن ريد إمبس", th: "ลินคอล์น เรด อิมป์ส" },
+            "Mainz": { aliases: "Mainz", zh: "美因茨", ar: "ماينز", th: "ไมนซ์" },
+            "Noah": { aliases: "Noah", zh: "诺亚", ar: "نوح", th: "โนอาห์" },
+            "Nordsjaelland": { aliases: "Nordsjaelland/Nordsjælland", zh: "北西兰岛", ar: "نوردشيلاند", th: "นอร์ดเยลลันด์" },
+            "Omonia": { aliases: "Omonia/Nicosia", zh: "奥莫尼亚", ar: "أومونيا", th: "โอโมเนีย" },
+            "Rakow Czestochowa": { aliases: "Raków/Częstochowa", zh: "拉库夫琴斯托霍瓦", ar: "راكوف تشيستوشوا", th: "ราคูฟ เชสโตโชวา" },
+            "Rapid Vienna": { aliases: "Rapid/Vienna", zh: "快速维也纳", ar: "رابيد فيينا", th: "ราปิด เวียนนา" },
+            "Rayo Vallecano": { aliases: "Rayo/Vallecano", zh: "巴列卡诺", ar: "رايو فاليكانو", th: "รายอ บาเยกาโน" },
+            "Rijeka": { aliases: "Rijeka", zh: "里耶卡", ar: "رييكا", th: "ริเยก้า" },
+            "Spartak Trnava": { aliases: "Spartak/Trnava", zh: "斯巴达克·特尔纳瓦", ar: "سبارتاك ترنافا", th: "สปาร์ตัก ทร์นาวา" },
+            "Samsunspor": { aliases: "Samsunspor", zh: "萨姆松体育", ar: "سامسون سبور", th: "ซัมซุนสปอร์" },
+            "Shamrock Rovers": { aliases: "Shamrock/Rovers", zh: "沙姆洛克流浪者队", ar: "شامروك روفرز", th: "แชมร็อค โรเวอร์ส" },
+            "Shelbourne": { aliases: "Shelbourne", zh: "谢尔伯恩", ar: "شيلبورن", th: "เชลเบิร์น" },
+            "Shkendija": { aliases: "Shkëndija", zh: "什肯迪亚", ar: "شكنديجا", th: "ชเคนดิยา" },
+            "Sigma Olomouc": { aliases: "Sigma/Olomouc", zh: "奥洛穆克西格玛", ar: "سيجما أولوموك", th: "ซิกม่า โอโลมุค" },
+            "SK Rapid": { aliases: "SK/Rapid", zh: "SK Rapid", ar: "SK رابيد", th: "เอสเค ราปิด" },
+            "Strasbourg": { aliases: "Strasbourg", zh: "斯特拉斯堡", ar: "ستراسبورغ", th: "สตราสบูร์ก" },
+            "Universitatea Craiova": { aliases: "Universitatea/Craiova", zh: "克拉约瓦大学", ar: "جامعة كرايوفا", th: "มหาวิทยาลัยคราอิโอวา" },
+            "Zorya Luhansk": { aliases: "Zorya/Luhansk", zh: "佐里亚·卢甘斯克", ar: "زوريا لوغانسك", th: "ซอร์ยา ลูฮันสค์" },
+            "Zrinjski": { aliases: "Zrinjski", zh: "兹林斯基", ar: "زرينجسكي", th: "ซรินจ์สกี้" }
+        };
+
+        // --- DOM Elements ---
+        const inputText = document.getElementById('inputText');
+        const extractBtn = document.getElementById('extractBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const resultsArea = document.getElementById('resultsArea');
+        const slotsContainer = document.getElementById('slotsContainer');
+        const statusArea = document.getElementById('statusArea');
+        const statusText = document.getElementById('statusText');
+        const slotCount = document.getElementById('slotCount');
+
+        // --- Logic ---
+
+        function clearInput() {
+            inputText.value = '';
+            resultsArea.classList.add('hidden');
+            statusArea.classList.remove('hidden');
+            slotsContainer.innerHTML = '';
+            statusText.innerText = 'No active extractions. Paste schedule above to begin.';
+            slotCount.innerText = '';
+            document.getElementById('box-champions').classList.add('hidden');
+            document.getElementById('box-europa').classList.add('hidden');
+            document.getElementById('box-conference').classList.add('hidden');
+        }
+
+        function setLoading(isLoading) {
+            extractBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.innerText = 'Processing...';
+                btnLoader.classList.remove('hidden');
+                extractBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            } else {
+                btnText.innerText = 'Extract Matches';
+                btnLoader.classList.add('hidden');
+                extractBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        async function processMatches() {
+            const text = inputText.value.trim();
+            if (!text) {
+                alert("Please paste some text first.");
+                return;
+            }
+
+            setLoading(true);
+            statusText.innerText = "Analysing schedule with Gemini...";
+
+            try {
+                // AI Step 1: Get Raw Matches
+                const rawMatches = await callGeminiAPI(text);
+                
+                // JS Step 2: Strict grouping (Exact League + Date + Start Time)
+                const groupedSlots = groupMatches(rawMatches);
+                
+                renderSlots(groupedSlots);
+                statusArea.classList.add('hidden');
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Error: " + error.message;
+                alert("Error: " + error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function callGeminiAPI(userText) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+            const dbKeys = Object.keys(MASTER_DB).map(key => {
+                const d = MASTER_DB[key];
+                return `${key} (Aliases: ${d.aliases}) -> ZH:${d.zh}`; 
+            }).join("\n");
+
+            const systemPrompt = `
+            You are a specialized sports schedule parser.
+            
+            TASK:
+            1. Analyze the "Input Text" and extract every single match found.
+            2. For each match, identify:
+               - League (Champions League, Europa League, Conference League)
+               - Date (YYYY-MM-DD)
+               - Start Time (HH:MM:SS)
+               - End Time (HH:MM:SS)
+               - Home Team (Object with name, zh, ar, th, ru)
+               - Away Team (Object with name, zh, ar, th, ru)
+            
+            TRANSLATION RULES:
+            - Use the "Database Keys" to find standard names and translations.
+            - If a team is NOT in the database, YOU MUST GENERATE THE TRANSLATIONS (zh, ar, th, ru).
+            - Do NOT output "Generated". Output actual text.
+            
+            OUTPUT FORMAT (JSON):
+            {
+                "matches": [
+                    {
+                        "league": "Champions League",
+                        "date": "2025-11-26",
+                        "startTime": "20:00:00",
+                        "endTime": "22:00:00",
+                        "home": { "name": "Arsenal", "zh": "...", ... },
+                        "away": { "name": "Spurs", "zh": "...", ... }
+                    }
+                ]
+            }
+
+            DATABASE KEYS:
+            ${dbKeys}
+            `;
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: `Input Text:\n${userText}` }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    maxOutputTokens: 8192 
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            const data = await response.json();
+            
+            try {
+                let textResponse = data.candidates[0].content.parts[0].text;
+                
+                // Robust JSON extraction
+                const startIndex = textResponse.indexOf('{');
+                const endIndex = textResponse.lastIndexOf('}');
+                
+                if (startIndex !== -1 && endIndex !== -1) {
+                    textResponse = textResponse.substring(startIndex, endIndex + 1);
+                }
+                
+                return JSON.parse(textResponse).matches;
+            } catch (e) {
+                console.error("Raw output failed to parse:", data.candidates[0].content.parts[0].text);
+                throw new Error("AI output parsing failed. Check console for details.");
+            }
+        }
+
+        function groupMatches(matches) {
+            if (!matches || matches.length === 0) return [];
+
+            // Helper to convert string to Date object
+            const getFullDate = (dateStr, timeStr) => {
+                // Handle missing seconds if necessary
+                const cleanTime = timeStr.length === 5 ? timeStr + ":00" : timeStr; 
+                return new Date(`${dateStr}T${cleanTime}`);
+            };
+
+            // 1. Sort matches by League, then Date, then Start Time
+            matches.sort((a, b) => {
+                if (a.league !== b.league) return a.league.localeCompare(b.league);
+                const dateA = getFullDate(a.date, a.startTime);
+                const dateB = getFullDate(b.date, b.startTime);
+                return dateA - dateB;
+            });
+
+            const slots = [];
+            let currentSlot = null;
+
+            for (const match of matches) {
+                const matchStart = getFullDate(match.date, match.startTime);
+                
+                // STRICT RULE: Every individual game lasts exactly 2 hours
+                const matchEnd = new Date(matchStart.getTime() + (2 * 60 * 60 * 1000));
+
+                if (!currentSlot) {
+                    // Start first slot
+                    currentSlot = {
+                        league: match.league,
+                        startObj: matchStart,
+                        endObj: matchEnd,
+                        teams: [match.home, match.away]
+                    };
+                    continue;
+                }
+
+                // Check criteria for merging: STRICTLY EXACT TIME
+                const isSameLeague = currentSlot.league === match.league;
+                const isSameStart = currentSlot.startObj.getTime() === matchStart.getTime();
+                
+                if (isSameLeague && isSameStart) {
+                    // Merge into same slot
+                    currentSlot.teams.push(match.home, match.away);
+                } else {
+                    // Push current and start new
+                    slots.push(finalizeSlot(currentSlot));
+                    currentSlot = {
+                        league: match.league,
+                        startObj: matchStart,
+                        endObj: matchEnd,
+                        teams: [match.home, match.away]
+                    };
+                }
+            }
+
+            if (currentSlot) {
+                slots.push(finalizeSlot(currentSlot));
+            }
+
+            return slots;
+        }
+
+        function finalizeSlot(slot) {
+            // Format Date objects back to strings required by renderSlots
+            const formatTime = (date) => {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                const hh = String(date.getHours()).padStart(2, '0');
+                const mm = String(date.getMinutes()).padStart(2, '0');
+                const ss = String(date.getSeconds()).padStart(2, '0');
+                return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+            };
+
+            return {
+                league: slot.league,
+                start: formatTime(slot.startObj),
+                end: formatTime(slot.endObj),
+                teams: slot.teams
+            };
+        }
+
+        function renderSlots(slots) {
+            slotsContainer.innerHTML = '';
+            
+            if (!slots || slots.length === 0) {
+                resultsArea.classList.add('hidden');
+                statusArea.classList.remove('hidden');
+                statusText.innerText = "No valid matches or slots found.";
+                return;
+            }
+
+            resultsArea.classList.remove('hidden');
+            slotCount.innerText = `${slots.length} slots found`;
+
+            let hasCL = false;
+            let hasEL = false;
+            let hasConf = false;
+
+            slots.forEach((slot, index) => {
+                const delay = index * 100;
+                const card = document.createElement('div');
+                card.className = "panel p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in";
+                card.style.animationDelay = `${delay}ms`;
+
+                let badgeClass = "badge-unknown";
+                let leagueName = slot.league || "Unknown League";
+                const lowerLeague = leagueName.toLowerCase();
+
+                if (lowerLeague.includes('champion')) { badgeClass = "badge-champions"; hasCL = true; }
+                else if (lowerLeague.includes('europa')) { badgeClass = "badge-europa"; hasEL = true; }
+                else if (lowerLeague.includes('conference')) { badgeClass = "badge-conference"; hasConf = true; }
+
+                // Team List
+                const teamListDiv = document.createElement('div');
+                teamListDiv.className = "flex flex-col gap-1 flex-grow min-w-[200px]";
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex items-center gap-2 mb-2";
+                headerDiv.innerHTML = `<span class="league-badge ${badgeClass}">${leagueName}</span> <span class="text-xs text-gray-500 font-bold">SLOT ${index + 1}</span>`;
+                teamListDiv.appendChild(headerDiv);
+
+                if (slot.teams && slot.teams.length > 0) {
+                    for (let i = 0; i < slot.teams.length; i += 2) {
+                        const tSpan = document.createElement('div');
+                        tSpan.className = "text-sm font-medium text-white";
+                        const homeObj = slot.teams[i];
+                        const awayObj = slot.teams[i+1]; 
+                        const homeName = homeObj ? homeObj.name : '?';
+                        const awayName = awayObj ? awayObj.name : '?';
+                        tSpan.innerHTML = `<span class="text-gray-400 mr-1">•</span> <span class="text-white">${homeName}</span> <span class="text-gray-600 mx-1">vs</span> <span class="text-white">${awayName}</span>`;
+                        teamListDiv.appendChild(tSpan);
+                    }
+                } else {
+                    const empty = document.createElement('div');
+                    empty.className = "text-sm text-gray-600 italic";
+                    empty.innerText = "No known teams detected";
+                    teamListDiv.appendChild(empty);
+                }
+
+                // Copy Button
+                const btnDiv = document.createElement('div');
+                const copyBtn = document.createElement('button');
+                copyBtn.className = "btn-green py-2 px-4 rounded font-medium text-sm whitespace-nowrap flex items-center gap-2";
+                copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy Terms`;
+                copyBtn.onclick = () => copySlotTerms(slot.teams, copyBtn);
+                btnDiv.appendChild(copyBtn);
+
+                // Time Display
+                const timeDiv = document.createElement('div');
+                timeDiv.className = "flex flex-col gap-2 min-w-[180px] justify-center";
+                
+                const startStr = slot.start || 'Unknown';
+                const endStr = slot.end || 'Unknown';
+
+                timeDiv.innerHTML = `
+                    <div class="bg-[#111] border border-[#333] px-3 py-2 rounded font-mono text-sm text-center text-gray-300 shadow-sm">
+                        ${startStr}
+                    </div>
+                    <div class="bg-[#111] border border-[#333] px-3 py-2 rounded font-mono text-sm text-center text-gray-300 shadow-sm">
+                        ${endStr}
+                    </div>
+                `;
+
+                card.appendChild(teamListDiv);
+                card.appendChild(btnDiv);
+                card.appendChild(timeDiv);
+                slotsContainer.appendChild(card);
+            });
+
+            document.getElementById('box-champions').classList.toggle('hidden', !hasCL);
+            document.getElementById('box-europa').classList.toggle('hidden', !hasEL);
+            document.getElementById('box-conference').classList.toggle('hidden', !hasConf);
+        }
+
+        function copySlotTerms(teams, btnElement) {
+            if (!teams || teams.length === 0) return;
+            let clipboardText = "";
+            teams.forEach(teamObj => {
+                if (teamObj && teamObj.name) {
+                    const dbEntry = MASTER_DB[teamObj.name];
+                    if (dbEntry && dbEntry.aliases) {
+                        const parts = dbEntry.aliases.split('/');
+                        parts.forEach(p => clipboardText += `${p.trim()}\n`);
+                    } else {
+                        clipboardText += `${teamObj.name}\n`;
+                    }
+                    if(teamObj.zh) clipboardText += `${teamObj.zh}\n`;
+                    if(teamObj.ar) clipboardText += `${teamObj.ar}\n`;
+                    if(teamObj.th) clipboardText += `${teamObj.th}\n`;
+                    if(teamObj.ru) clipboardText += `${teamObj.ru}\n`;
+                }
+            });
+            copyText(clipboardText, btnElement);
+        }
+
+        function copyText(text, btnElement) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.left = "0";
+            ta.style.top = "0";
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                const originalHTML = btnElement.innerHTML;
+                btnElement.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+                setTimeout(() => { btnElement.innerHTML = originalHTML; }, 1500);
+            } catch (err) {
+                alert("Manual copy failed.");
+            }
+            document.body.removeChild(ta);
+        }
+
+    </script>
+</body>
+</html>
