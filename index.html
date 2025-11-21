@@ -552,9 +552,6 @@ ${userText}`;
                 max_output_tokens: 16384
             };
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
-
             try {
                 const response = await fetch("https://api.openai.com/v1/responses", {
                     method: 'POST',
@@ -562,10 +559,8 @@ ${userText}`;
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${API_KEY}`
                     },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
+                    body: JSON.stringify(payload)
                 });
-                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     const errText = await response.text();
@@ -601,9 +596,6 @@ ${userText}`;
                 const parsed = JSON.parse(outputText);
                 return parsed.matches || [];
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    throw new Error("Request timed out after 120 seconds. The schedule might be too large.");
-                }
                 console.error("API Error:", error);
                 throw error;
             }
