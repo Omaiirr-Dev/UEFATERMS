@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,15 +57,18 @@
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
-            background: var(--bg-main); 
+            background: var(--bg-main);
         }
+
         ::-webkit-scrollbar-thumb {
-            background: #444; 
+            background: #444;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #555; 
+            background: #555;
         }
 
         .btn-green {
@@ -72,6 +76,7 @@
             color: white;
             transition: all 0.2s;
         }
+
         .btn-green:hover:not(:disabled) {
             background-color: var(--btn-green-hover);
         }
@@ -81,12 +86,13 @@
             color: white;
             transition: all 0.2s;
         }
+
         .btn-red:hover {
             background-color: var(--btn-red-hover);
         }
 
         .loader {
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 2px solid white;
             width: 16px;
@@ -95,18 +101,31 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Fade In Animation */
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
             opacity: 0;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* League Badges */
@@ -118,13 +137,33 @@
             border-radius: 4px;
             letter-spacing: 0.05em;
         }
-        .badge-champions { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
-        .badge-europa { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
-        .badge-conference { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
-        .badge-unknown { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
 
+        .badge-champions {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .badge-europa {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .badge-conference {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .badge-unknown {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.4);
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col p-6">
 
     <!-- Header -->
@@ -134,14 +173,14 @@
 
     <!-- Main Content -->
     <main class="max-w-5xl mx-auto w-full flex flex-col gap-6">
-        
+
         <!-- Input Panel -->
         <div class="panel p-6">
             <h2 class="text-xl font-semibold mb-4 border-b border-[#333] pb-2">Schedule Input</h2>
-            
+
             <div class="flex flex-col gap-4">
-                <textarea id="inputText" class="input-area w-full h-40 rounded p-4 text-sm mono-font resize-none" 
-                placeholder="Paste your schedule here...
+                <textarea id="inputText" class="input-area w-full h-40 rounded p-4 text-sm mono-font resize-none"
+                    placeholder="Paste your schedule here...
 No more than 10 events or else it may not handle the load.
 
 Example:
@@ -149,11 +188,12 @@ Example:
 27/11/2025 Europa League: Ajax vs Roma 17:30 19:30"></textarea>
 
                 <div class="flex gap-4">
-                    <button id="extractBtn" onclick="processMatches()" class="btn-green font-semibold py-2 px-6 rounded shadow-lg flex items-center justify-center gap-2 min-w-[160px]">
+                    <button id="extractBtn" onclick="processMatches()"
+                        class="btn-green font-semibold py-2 px-6 rounded shadow-lg flex items-center justify-center gap-2 min-w-[160px]">
                         <span id="btnText">Extract Matches</span>
                         <div id="btnLoader" class="loader hidden"></div>
                     </button>
-                    
+
                     <button onclick="clearInput()" class="btn-red font-semibold py-2 px-6 rounded shadow-lg">
                         Clear Input
                     </button>
@@ -163,10 +203,11 @@ Example:
 
         <!-- Output Area -->
         <div id="resultsArea" class="flex flex-col gap-4 hidden">
-            
+
             <div class="flex flex-wrap gap-4 justify-center w-full">
                 <!-- Champions League Terms -->
-                <div id="box-champions" class="panel p-4 border-l-4 border-blue-500 bg-[#161b22] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                <div id="box-champions"
+                    class="panel p-4 border-l-4 border-blue-500 bg-[#161b22] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
                     <div>
                         <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2">
                             <i class="fa-solid fa-star mr-1"></i> Champions League
@@ -178,16 +219,19 @@ Example:
                         </div>
                         <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
                             <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
-                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                            Ensure these are copied in for the league from the start of the first game till the end of
+                            the last game
                         </p>
                     </div>
-                    <button onclick="copyText('UEFA\nChampions League\nChampionsLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                    <button onclick="copyText('UEFA\nChampions League\nChampionsLeague', this)"
+                        class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
                         <i class="fa-regular fa-copy"></i> Copy Terms
                     </button>
                 </div>
 
                 <!-- Europa League Terms -->
-                <div id="box-europa" class="panel p-4 border-l-4 border-orange-500 bg-[#1f1612] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                <div id="box-europa"
+                    class="panel p-4 border-l-4 border-orange-500 bg-[#1f1612] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
                     <div>
                         <h3 class="text-orange-400 font-bold text-sm uppercase tracking-wider mb-2">
                             <i class="fa-solid fa-trophy mr-1"></i> Europa League
@@ -199,16 +243,19 @@ Example:
                         </div>
                         <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
                             <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
-                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                            Ensure these are copied in for the league from the start of the first game till the end of
+                            the last game
                         </p>
                     </div>
-                    <button onclick="copyText('UEFA\nEuropa League\nEuropaLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                    <button onclick="copyText('UEFA\nEuropa League\nEuropaLeague', this)"
+                        class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
                         <i class="fa-regular fa-copy"></i> Copy Terms
                     </button>
                 </div>
 
                 <!-- Conference League Terms -->
-                <div id="box-conference" class="panel p-4 border-l-4 border-green-500 bg-[#121f16] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
+                <div id="box-conference"
+                    class="panel p-4 border-l-4 border-green-500 bg-[#121f16] flex flex-col justify-between gap-3 animate-fade-in flex-1 min-w-[300px] hidden">
                     <div>
                         <h3 class="text-green-400 font-bold text-sm uppercase tracking-wider mb-2">
                             <i class="fa-solid fa-medal mr-1"></i> Conference League
@@ -220,10 +267,12 @@ Example:
                         </div>
                         <p class="text-xs text-gray-500 mt-3 flex items-center leading-snug">
                             <i class="fa-solid fa-circle-info mr-2 flex-shrink-0"></i>
-                            Ensure these are copied in for the league from the start of the first game till the end of the last game
+                            Ensure these are copied in for the league from the start of the first game till the end of
+                            the last game
                         </p>
                     </div>
-                    <button onclick="copyText('UEFA\nConference League\nConferenceLeague', this)" class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
+                    <button onclick="copyText('UEFA\nConference League\nConferenceLeague', this)"
+                        class="btn-green py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 w-full">
                         <i class="fa-regular fa-copy"></i> Copy Terms
                     </button>
                 </div>
@@ -248,14 +297,14 @@ Example:
     <!-- Application Logic -->
     <script>
         // --- Configuration ---
-        const API_KEY = "AIzaSyBJFzFbm9cj72vW67lESzzQIYApu21gOgI"; 
-        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
-        
+        const API_KEY = "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";
+        const MODEL_NAME = "gpt-5-mini";
+
         // Master Data Object
         const MASTER_DB = {
             // --- CHAMPIONS LEAGUE ---
             "Arsenal": { aliases: "Arsenal", zh: "阿森纳", ar: "آرسنال", th: "อาร์เซนอล", ru: "Арсенал" },
-            "Aston Villa": { aliases: "Aston Villa", zh: "阿斯顿维拉", ar: "أستون فيلا", th: "แอสตันวิลล่า", ru: "Астон вилла" },
+            "Aston Villa": { aliases: "Aston Villa", zh: "阿斯顿维拉", ar: "أستون فيلا", th: "แอสตันวิลล่า", ru: "อストン вилла" },
             "Atalanta": { aliases: "Atalanta", zh: "亚特兰大", ar: "أتالانتا", th: "อตาลันต้า", ru: "Аталанта" },
             "Atletico Madrid": { aliases: "Atlético/Atletico/Madrid", zh: "马德里竞技", ar: "أتليتيكو مدريد", th: "แอตเลติโก", ru: "Атлетико / Атлетико Мадрид" },
             "Barcelona": { aliases: "Barcelona", zh: "巴塞罗那", ar: "برشلونة", th: "บาร์เซโลน่า", ru: "Барселона" },
@@ -291,23 +340,23 @@ Example:
             "Sparta Prague": { aliases: "Sparta/Praha/Prague", zh: "布拉格斯巴达", ar: "سبارتا براغ", th: "สปาร์ต้า ปราก", ru: "Спарта Прага" },
             "Sporting CP": { aliases: "Sporting/Lisbon/CP", zh: "运动", ar: "سبورتنج", th: "สปอร์ติ้งลิสบอน", ru: "Спортинг" },
             "Sturm Graz": { aliases: "Sturm/Graz", zh: "格拉茨风暴", ar: "إس كيه ستورم جراتس", th: "เอสเค สตอร์ม กราซ", ru: "Штурм Грац" },
-            "Stuttgart": { aliases: "Stuttgart/Vfb", zh: "斯图加特", ar: "شتوتغارت", th: "สตุ๊ตการ์ท", ru: "Штутгарт" },
+            "Stuttgart": { aliases: "Stuttgart/Vfb", zh: "斯图加特", ar: "شتوتغارت", th: "สตุ๊ตการ์ท", ru: "Штутการ์ท" },
             "Young Boys": { aliases: "Young Boys", zh: "年轻的男孩", ar: "يونج بويز", th: "ชายหนุ่ม", ru: "Янг Бойз" },
             "Royal Antwerp": { aliases: "Antwerp/Royal Antwerp", zh: "皇家安特卫普", ar: "رويال أنتويرب", th: "รอยัลแอนต์เวิร์ป", ru: "Роял Антверп" },
             "Copenhagen": { aliases: "København/Copenhagen", zh: "哥本哈根", ar: "كوبنهاجن", th: "โคเปนเฮเกน", ru: "Копенгаген" },
             "Galatasaray": { aliases: "Galatasaray", zh: "加拉塔萨雷", ar: "غلطة سراي", th: "กาลาตาซาเรย์", ru: "Галатасарай" },
             "Lazio": { aliases: "Lazio", zh: "拉齐奥", ar: "لاتسيو", th: "ลาซิโอ", ru: "Лацио" },
             "Lens": { aliases: "Lens", zh: "镜片", ar: "لنس", th: "เลนส์", ru: "Ланс" },
-            "Manchester United": { aliases: "Manchester/Man United/Man Utd", zh: "曼联", ar: "مانشستر يونايتد", th: "แมนเชสเตอร์", ru: "Манчестер Юнайтед" },
+            "Manchester United": { aliases: "Manchester/Man United/Man Utd", zh: "曼联", ar: "مانشستر يونايเตد", th: "แมนเชสเตอร์", ru: "Манчестер Юнайтед" },
             "Napoli": { aliases: "Napoli", zh: "那不勒斯", ar: "نابولي", th: "นาโปลี", ru: "Наполи" },
             "Porto": { aliases: "Porto", zh: "波尔图", ar: "بورتو", th: "ปอร์โต", ru: "Порту" },
-            "Real Sociedad": { aliases: "Sociedad/Real Sociedad", zh: "皇家社会", ar: "ريال سوسيداد", th: "เรอัล โซเซียดาด", ru: "เรอัล โซเซียดาด" },
+            "Real Sociedad": { aliases: "Sociedad/Real Sociedad", zh: "皇家社会", ar: "ريال سوسيداد", th: "เรอัล โซเซียดาด", ru: "Реал Сосьедад" },
             "Sevilla": { aliases: "Sevilla", zh: "塞维利亚", ar: "اشبيلية", th: "เซบีย่า", ru: "Севилья" },
             "Union Berlin": { aliases: "Union/Berlin", zh: "联盟 柏林", ar: "يونيون برلين", th: "ยูเนี่ยน เบอร์ลิน", ru: "Унион Берлин" },
             "Qarabag": { aliases: "Qarabag", zh: "卡拉巴格足球俱乐部", ar: "نادي كاراباغ لكرة القدم", th: "คาราบัค เอฟเค", ru: "Карабах ФК" },
-            "Villarreal": { aliases: "Villarreal", zh: "比利亚雷亚尔", ar: "فياريال", th: "บียาร์เรอัล", ru: "Вильярреал" },
+            "Villarreal": { aliases: "Villarreal", zh: "比利亚雷亚尔", ar: "فياريال", th: "บียาร์เรอัล", ru: "Вильяรเรอัล" },
             "Tottenham": { aliases: "Tottenham/Spurs", zh: "托特纳姆热刺", ar: "توتنهام", th: "ท็อตแน่ม ฮ็อทสเปอร์", ru: "Тоттенхэм" },
-            
+
             // --- EUROPA LEAGUE ---
             "Basel": { aliases: "Basel", zh: "巴塞尔", ar: "بازل", th: "บาเซิล" },
             "Braga": { aliases: "Braga", zh: "布拉加", ar: "براغا", th: "บรากา" },
@@ -329,7 +378,7 @@ Example:
             "Nottingham Forest": { aliases: "Nottingham/Forest", zh: "诺丁汉森林", ar: "نوتنغهام فورست", th: "น็อตติงแฮม ฟอเรสต์" },
             "Panathinaikos": { aliases: "Panathinaikos", zh: "帕纳辛奈科斯", ar: "باناثينايكوس", th: "ปานาธิไนกอส" },
             "PAOK": { aliases: "PAOK", zh: "帕奥克", ar: "باوك", th: "พีเอโอเค" },
-            "Rangers": { aliases: "Rangers", zh: "游骑兵队", ar: "رينجرز", th: "เรนเจอร์ส" },
+            "Rangers": { aliases: "Rangers", zh: "游骑兵队", ar: "รินเจอร์ส", th: "เรนเจอร์ส" },
             "Real Betis": { aliases: "Real/Betis", zh: "皇家贝蒂斯", ar: "ريال بيتيس", th: "เรอัล เบติส" },
             "Roma": { aliases: "Roma", zh: "罗马", ar: "روما", th: "โรม่า" },
             "Utrecht": { aliases: "Utrecht", zh: "乌得勒支", ar: "أوتريخت", th: "อูเทรคท์" },
@@ -349,7 +398,7 @@ Example:
             "Crystal Palace": { aliases: "Crystal/Palace", zh: "水晶宫", ar: "كريستال بالاس", th: "คริสตัล พาเลซ" },
             "Dynamo Kyiv": { aliases: "Dynamo/Kyiv", zh: "基辅迪纳摩", ar: "دينامو كييف", th: "ไดนาโม เคียฟ" },
             "Drita": { aliases: "Drita", zh: "德丽塔", ar: "دريتا", th: "ดริตา" },
-            "Eintracht Frankfurt": { aliases: "Eintracht/Frankfurt/Francoforte", zh: "法兰克福足球俱乐部", ar: "آينتراخت فرانكفورت", th: "ไอน์ทรัคท์ แฟรงค์เฟิร์ต" },
+            "Eintracht Frankfurt": { aliases: "Eintracht/Frankfurt/Francoforte", zh: "法兰克福足球俱乐部", ar: "آينتراخت فرانكفورت", th: "ไอน์ทรัคท์ แฟรงก์เฟิร์ต" },
             "Fiorentina": { aliases: "Fiorentina", zh: "佛罗伦萨", ar: "فيورنتينا", th: "ฟิออเรนติน่า" },
             "Hacken": { aliases: "Häcken", zh: "哈肯", ar: "هاكن", th: "แฮคเคน" },
             "Hamrun Spartans": { aliases: "Hamrun/Spartans", zh: "哈姆伦斯巴达人队", ar: "هامرون سبارتانز", th: "ฮัมรัน สปาร์ตันส์" },
@@ -371,7 +420,7 @@ Example:
             "Spartak Trnava": { aliases: "Spartak/Trnava", zh: "斯巴达克·特尔纳瓦", ar: "سبارتاك ترنافا", th: "สปาร์ตัก ทร์นาวา" },
             "Samsunspor": { aliases: "Samsunspor", zh: "萨姆松体育", ar: "سامسون سبور", th: "ซัมซุนสปอร์" },
             "Shamrock Rovers": { aliases: "Shamrock/Rovers", zh: "沙姆洛克流浪者队", ar: "شامروك روفرز", th: "แชมร็อค โรเวอร์ส" },
-            "Shelbourne": { aliases: "Shelbourne", zh: "谢尔伯恩", ar: "شيلبورن", th: "เชลเบิร์น" },
+            "Shelbourne": { aliases: "Shelbourne", zh: "谢尔伯恩", ar: "شيلبورน", th: "เชลเบิร์น" },
             "Shkendija": { aliases: "Shkëndija", zh: "什肯迪亚", ar: "شكنديجا", th: "ชเคนดิยา" },
             "Sigma Olomouc": { aliases: "Sigma/Olomouc", zh: "奥洛穆克西格玛", ar: "سيجما أولوموك", th: "ซิกม่า โอโลมุค" },
             "SK Rapid": { aliases: "SK/Rapid", zh: "SK Rapid", ar: "SK رابيد", th: "เอสเค ราปิด" },
@@ -427,15 +476,15 @@ Example:
             }
 
             setLoading(true);
-            statusText.innerText = "Analysing schedule with Gemini...";
+            statusText.innerText = "Analysing schedule with GPT-5 Mini...";
 
             try {
                 // AI Step 1: Get Raw Matches
-                const rawMatches = await callGeminiAPI(text);
-                
+                const rawMatches = await callOpenAIAPI(text);
+
                 // JS Step 2: Strict grouping (Exact League + Date + Start Time)
                 const groupedSlots = groupMatches(rawMatches);
-                
+
                 renderSlots(groupedSlots);
                 statusArea.classList.add('hidden');
             } catch (error) {
@@ -447,87 +496,111 @@ Example:
             }
         }
 
-        async function callGeminiAPI(userText) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-
+        async function callOpenAIAPI(userText) {
             const dbKeys = Object.keys(MASTER_DB).map(key => {
                 const d = MASTER_DB[key];
-                return `${key} (Aliases: ${d.aliases}) -> ZH:${d.zh}`; 
+                return `${key} (Aliases: ${d.aliases}) -> ZH:${d.zh}`;
             }).join("\n");
 
-            const systemPrompt = `
-            You are a specialized sports schedule parser.
-            
-            TASK:
-            1. Analyze the "Input Text" and extract every single match found.
-            2. For each match, identify:
-               - League (Champions League, Europa League, Conference League)
-               - Date (YYYY-MM-DD)
-               - Start Time (HH:MM:SS)
-               - End Time (HH:MM:SS)
-               - Home Team (Object with name, zh, ar, th, ru)
-               - Away Team (Object with name, zh, ar, th, ru)
-            
-            TRANSLATION RULES:
-            - Use the "Database Keys" to find standard names and translations.
-            - If a team is NOT in the database, YOU MUST GENERATE THE TRANSLATIONS (zh, ar, th, ru).
-            - Do NOT output "Generated". Output actual text.
-            
-            OUTPUT FORMAT (JSON):
-            {
-                "matches": [
-                    {
-                        "league": "Champions League",
-                        "date": "2025-11-26",
-                        "startTime": "20:00:00",
-                        "endTime": "22:00:00",
-                        "home": { "name": "Arsenal", "zh": "...", ... },
-                        "away": { "name": "Spurs", "zh": "...", ... }
-                    }
-                ]
-            }
+            const promptText = `You are a specialized sports schedule parser.
 
-            DATABASE KEYS:
-            ${dbKeys}
-            `;
+TASK:
+1. Analyze the "Input Text" and extract every single match found.
+2. For each match, identify:
+   - League (Champions League, Europa League, Conference League)
+   - Date (YYYY-MM-DD)
+   - Start Time (HH:MM:SS)
+   - End Time (HH:MM:SS)
+   - Home Team (Object with name, zh, ar, th, ru)
+   - Away Team (Object with name, zh, ar, th, ru)
+
+TRANSLATION RULES:
+- Use the "Database Keys" to find standard names and translations.
+- If a team is NOT in the database, YOU MUST GENERATE THE TRANSLATIONS (zh, ar, th, ru).
+- Do NOT output "Generated". Output actual text.
+
+OUTPUT FORMAT (JSON):
+{
+    "matches": [
+        {
+            "league": "Champions League",
+            "date": "2025-11-26",
+            "startTime": "20:00:00",
+            "endTime": "22:00:00",
+            "home": { "name": "Arsenal", "zh": "...", ... },
+            "away": { "name": "Spurs", "zh": "...", ... }
+        }
+    ]
+}
+
+DATABASE KEYS:
+${dbKeys}
+
+INPUT TEXT:
+${userText}`;
 
             const payload = {
-                contents: [{
-                    parts: [{ text: `Input Text:\n${userText}` }]
-                }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    maxOutputTokens: 8192 
-                }
+                model: MODEL_NAME,
+                input: promptText,
+                reasoning: { effort: "minimal" },
+                text: { verbosity: "medium" },
+                max_output_tokens: 16384
             };
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
-            const data = await response.json();
-            
             try {
-                let textResponse = data.candidates[0].content.parts[0].text;
-                
-                // Robust JSON extraction
-                const startIndex = textResponse.indexOf('{');
-                const endIndex = textResponse.lastIndexOf('}');
-                
-                if (startIndex !== -1 && endIndex !== -1) {
-                    textResponse = textResponse.substring(startIndex, endIndex + 1);
+                const response = await fetch("https://api.openai.com/v1/responses", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API Error: ${response.status} - ${errText}`);
                 }
-                
-                return JSON.parse(textResponse).matches;
-            } catch (e) {
-                console.error("Raw output failed to parse:", data.candidates[0].content.parts[0].text);
-                throw new Error("AI output parsing failed. Check console for details.");
+
+                const data = await response.json();
+                console.log("Full API Response:", data);
+
+                // Handle Responses API format: data.output is an array
+                let outputText = "";
+
+                if (data.output && Array.isArray(data.output)) {
+                    // Find the message item in the output array
+                    const messageItem = data.output.find(item => item.type === 'message');
+                    if (messageItem && messageItem.content && messageItem.content[0]) {
+                        outputText = messageItem.content[0].text || "";
+                    }
+                } else if (typeof data.output_text === 'string') {
+                    outputText = data.output_text;
+                } else if (typeof data.output === 'string') {
+                    outputText = data.output;
+                }
+
+                console.log("Extracted Text:", outputText);
+
+                if (!outputText) {
+                    console.error("Could not extract text from response:", data);
+                    throw new Error("No output text found in API response");
+                }
+
+                // Parse the JSON
+                const parsed = JSON.parse(outputText);
+                return parsed.matches || [];
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error("Request timed out after 120 seconds. The schedule might be too large.");
+                }
+                console.error("API Error:", error);
+                throw error;
             }
         }
 
@@ -537,7 +610,7 @@ Example:
             // Helper to convert string to Date object
             const getFullDate = (dateStr, timeStr) => {
                 // Handle missing seconds if necessary
-                const cleanTime = timeStr.length === 5 ? timeStr + ":00" : timeStr; 
+                const cleanTime = timeStr.length === 5 ? timeStr + ":00" : timeStr;
                 return new Date(`${dateStr}T${cleanTime}`);
             };
 
@@ -554,7 +627,7 @@ Example:
 
             for (const match of matches) {
                 const matchStart = getFullDate(match.date, match.startTime);
-                
+
                 // STRICT RULE: Every individual game lasts exactly 2 hours
                 const matchEnd = new Date(matchStart.getTime() + (2 * 60 * 60 * 1000));
 
@@ -572,7 +645,7 @@ Example:
                 // Check criteria for merging: STRICTLY EXACT TIME
                 const isSameLeague = currentSlot.league === match.league;
                 const isSameStart = currentSlot.startObj.getTime() === matchStart.getTime();
-                
+
                 if (isSameLeague && isSameStart) {
                     // Merge into same slot
                     currentSlot.teams.push(match.home, match.away);
@@ -617,7 +690,7 @@ Example:
 
         function renderSlots(slots) {
             slotsContainer.innerHTML = '';
-            
+
             if (!slots || slots.length === 0) {
                 resultsArea.classList.add('hidden');
                 statusArea.classList.remove('hidden');
@@ -649,7 +722,7 @@ Example:
                 // Team List
                 const teamListDiv = document.createElement('div');
                 teamListDiv.className = "flex flex-col gap-1 flex-grow min-w-[200px]";
-                
+
                 const headerDiv = document.createElement('div');
                 headerDiv.className = "flex items-center gap-2 mb-2";
                 headerDiv.innerHTML = `<span class="league-badge ${badgeClass}">${leagueName}</span> <span class="text-xs text-gray-500 font-bold">SLOT ${index + 1}</span>`;
@@ -660,7 +733,7 @@ Example:
                         const tSpan = document.createElement('div');
                         tSpan.className = "text-sm font-medium text-white";
                         const homeObj = slot.teams[i];
-                        const awayObj = slot.teams[i+1]; 
+                        const awayObj = slot.teams[i + 1];
                         const homeName = homeObj ? homeObj.name : '?';
                         const awayName = awayObj ? awayObj.name : '?';
                         tSpan.innerHTML = `<span class="text-gray-400 mr-1">•</span> <span class="text-white">${homeName}</span> <span class="text-gray-600 mx-1">vs</span> <span class="text-white">${awayName}</span>`;
@@ -684,7 +757,7 @@ Example:
                 // Time Display
                 const timeDiv = document.createElement('div');
                 timeDiv.className = "flex flex-col gap-2 min-w-[180px] justify-center";
-                
+
                 const startStr = slot.start || 'Unknown';
                 const endStr = slot.end || 'Unknown';
 
@@ -720,10 +793,10 @@ Example:
                     } else {
                         clipboardText += `${teamObj.name}\n`;
                     }
-                    if(teamObj.zh) clipboardText += `${teamObj.zh}\n`;
-                    if(teamObj.ar) clipboardText += `${teamObj.ar}\n`;
-                    if(teamObj.th) clipboardText += `${teamObj.th}\n`;
-                    if(teamObj.ru) clipboardText += `${teamObj.ru}\n`;
+                    if (teamObj.zh) clipboardText += `${teamObj.zh}\n`;
+                    if (teamObj.ar) clipboardText += `${teamObj.ar}\n`;
+                    if (teamObj.th) clipboardText += `${teamObj.th}\n`;
+                    if (teamObj.ru) clipboardText += `${teamObj.ru}\n`;
                 }
             });
             copyText(clipboardText, btnElement);
@@ -751,4 +824,5 @@ Example:
 
     </script>
 </body>
+
 </html>
