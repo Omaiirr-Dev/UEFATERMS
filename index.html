@@ -302,7 +302,7 @@ Example:
     <!-- Application Logic -->
     <script>
         // --- Configuration ---
-        const API_KEY = "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";
+        const API_KEY = "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";
         const MODEL_NAME = "gpt-5-mini";
 
         // Master Data Object
@@ -552,6 +552,9 @@ ${userText}`;
                 max_output_tokens: 16384
             };
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
+
             try {
                 const response = await fetch("https://api.openai.com/v1/responses", {
                     method: 'POST',
@@ -559,8 +562,10 @@ ${userText}`;
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${API_KEY}`
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     const errText = await response.text();
@@ -596,6 +601,9 @@ ${userText}`;
                 const parsed = JSON.parse(outputText);
                 return parsed.matches || [];
             } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error("Request timed out after 120 seconds. The schedule might be too large.");
+                }
                 console.error("API Error:", error);
                 throw error;
             }
